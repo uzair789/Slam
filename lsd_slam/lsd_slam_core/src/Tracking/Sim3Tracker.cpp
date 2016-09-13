@@ -422,7 +422,7 @@ void Sim3Tracker::calcSim3BuffersNEON(
 }
 #endif
 
-
+///
 void Sim3Tracker::calcSim3Buffers(
 		const TrackingReference* reference,
 		Frame* frame,
