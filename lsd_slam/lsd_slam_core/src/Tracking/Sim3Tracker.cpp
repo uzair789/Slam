@@ -160,7 +160,7 @@ Sim3 Sim3Tracker::trackFrameSim3(
 		const Sim3& frameToReference_initialEstimate,
 		int startLevel, int finalLevel)
 {
-	boost::shared_lock<boost::shared_mutex> lock = frame->getActiveLock();
+	//boost::shared_lock<boost::shared_mutex> lock = frame->getActiveLock();
 
 	diverged = false;
 
@@ -179,6 +179,19 @@ Sim3 Sim3Tracker::trackFrameSim3(
 	Sim3ResidualStruct finalResidual;
 
 	bool warp_update_up_to_date = false;
+
+	///////////////////////////
+	/*
+	int w = frame->width(0);
+	int h = frame->height(0);
+
+	ROSOutput3DWrapper* outputWrapper_frame = new ROSOutput3DWrapper(w,h);
+    //outputWrapper_frame -> publishKeyframe(reference -> keyframe,1);//(frame,1);
+	//for the keyframe, pass reference->keyframe because keyframe is a Frame object
+	
+	outputWrapper_frame -> publishFrameAsImage(frame);
+////////////////////
+*/
 
 	for(int lvl=startLevel;lvl >= finalLevel;lvl--)
 	{
@@ -199,9 +212,9 @@ Sim3 Sim3Tracker::trackFrameSim3(
 		}
 
 
-
-
-
+		//
+	
+		//
 		Sim3ResidualStruct lastErr = callOptimized(calcSim3WeightsAndResidual,(referenceToFrame));
 		if(plotSim3TrackingIterationInfo) callOptimized(calcSim3Buffers,(reference, frame, referenceToFrame, lvl, true));
 		numCalcResidualCalls[lvl]++;
@@ -461,8 +474,10 @@ void Sim3Tracker::calcSim3Buffers(
 
 	///
 	//trying to publish the frame and the reference frame
-	ROSOutput3DWrapper* outputWrapper_frame = new ROSOutput3DWrapper(w,h);
-	outputWrapper_frame -> publishKeyframe(frame,1);
+//**	ROSOutput3DWrapper* outputWrapper_frame = new ROSOutput3DWrapper(w,h);
+//	outputWrapper_frame -> publishKeyframe(reference -> keyframe,1);//(frame,1);
+	//for the keyframe, pass reference->keyframe because keyframe is a Frame object
+//**	outputWrapper_frame -> publishKeyframe(frame,1);
 
 
 

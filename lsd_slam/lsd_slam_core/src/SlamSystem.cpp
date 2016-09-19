@@ -944,7 +944,7 @@ void SlamSystem::trackFrame(uchar* image, unsigned int frameID, bool blockUntilM
 	tracking_lastGoodPerBad = tracker->lastGoodCount / (tracker->lastGoodCount + tracker->lastBadCount);
 	tracking_lastGoodPerTotal = tracker->lastGoodCount / (trackingNewFrame->width(SE3TRACKING_MIN_LEVEL)*trackingNewFrame->height(SE3TRACKING_MIN_LEVEL));
 
-
+	
 	if(manualTrackingLossIndicated || tracker->diverged || (keyFrameGraph->keyframesAll.size() > INITIALIZATION_PHASE_COUNT && !tracker->trackingWasGood))
 	{
 		printf("TRACKING LOST for frame %d (%1.2f%% good Points, which is %1.2f%% of available points, %s)!\n",
@@ -968,8 +968,8 @@ void SlamSystem::trackFrame(uchar* image, unsigned int frameID, bool blockUntilM
 
 
 
-	if(plotTracking)
-	{
+	//if(plotTracking)
+	//{
 		Eigen::Matrix<float, 20, 1> data;
 		data.setZero();
 		data[0] = tracker->lastResidual;
@@ -981,7 +981,7 @@ void SlamSystem::trackFrame(uchar* image, unsigned int frameID, bool blockUntilM
 		data[6] = tracker->affineEstimation_a;
 		data[7] = tracker->affineEstimation_b;
 		outputWrapper->publishDebugInfo(data);
-	}
+	//}
 
 	keyFrameGraph->addFrame(trackingNewFrame.get());
 

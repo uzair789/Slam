@@ -60,15 +60,17 @@ public:
 
 	// initializes cam-calib independent stuff
 	ROSOutput3DWrapper(int width, int height);
+	
+	
 	~ROSOutput3DWrapper();
 
 	virtual void publishKeyframeGraph(KeyFrameGraph* graph);
 
 	// publishes a keyframe. if that frame already existis, it is overwritten, otherwise it is added.
-	virtual void publishKeyframe(Frame* f, int n);
+	virtual void publishKeyframe(Frame* f);//, int n);
 
 	// published a tracked frame that did not become a keyframe (i.e. has no depth data)
-	virtual void publishTrackedFrame(Frame* f);
+	virtual void publishTrackedFrame(Frame* f);//, int n);
 
 	// publishes graph and all constraints, as well as updated KF poses.
 	virtual void publishTrajectory(std::vector<Eigen::Matrix<float, 3, 1>> trajectory, std::string identifier);
@@ -77,9 +79,16 @@ public:
 
 	virtual void publishDebugInfo(Eigen::Matrix<float, 20, 1> data);
 
+	//
+	virtual void publishFrameAsImage(Frame* f);
+	//
 
 	int publishLvl;
-	
+
+//
+	//int flag;
+//
+
 private:
 	int width, height;
 
@@ -99,8 +108,15 @@ private:
 	std::string pose_channel;
 	ros::Publisher pose_publisher;
 
-	std::string keyframe_channel_frame_rcnn;
-	ros::Publisher keyframe_publisher_frame_rcnn;
+	//std::string keyframe_channel_frame_rcnn;
+	//ros::Publisher keyframe_publisher_frame_rcnn;
+//
+	std::string keyframe_image_frcnn;
+	ros::Publisher keyframe_image_frcnn_publisher;
+
+	std::string debug_channel;
+	ros::Publisher debug_channel_publisher;
+//
 
 	ros::NodeHandle nh_;
 };

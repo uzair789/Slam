@@ -155,6 +155,7 @@ int main( int argc, char** argv )
 		exit(0);
 	}
 
+	
 	int w = undistorter->getOutputWidth();
 	int h = undistorter->getOutputHeight();
 

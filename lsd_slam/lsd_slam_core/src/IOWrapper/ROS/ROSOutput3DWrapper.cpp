@@ -34,6 +34,14 @@
 #include "geometry_msgs/PoseStamped.h"
 #include "GlobalMapping/g2oTypeSim3Sophus.h"
 
+//
+#include <sensor_msgs/Image.h>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/highgui/highgui.hpp>
+#include "stdio.h"
+#include "std_msgs/String.h"
+//
+
 namespace lsd_slam
 {
 
@@ -59,20 +67,28 @@ ROSOutput3DWrapper::ROSOutput3DWrapper(int width, int height)
 	pose_publisher = nh_.advertise<geometry_msgs::PoseStamped>(pose_channel,1);
 
 	///
-	keyframe_channel_frame_rcnn = nh_.resolveName("lsd_slam/keyframes_fasterRcnn");
-	keyframe_publisher_frame_rcnn = nh_.advertise<lsd_slam_viewer::keyframeMsg>(keyframe_channel_frame_rcnn,1);
+	//keyframe_channel_frame_rcnn = nh_.resolveName("lsd_slam/keyframes_fasterRcnn");
+	//keyframe_publisher_frame_rcnn = nh_.advertise<lsd_slam_viewer::keyframeMsg>(keyframe_channel_frame_rcnn,1);
+
+	keyframe_image_frcnn = nh_.resolveName("lsd_slam/keyframes_image_fasterRcnn");
+	keyframe_image_frcnn_publisher = nh_.advertise<sensor_msgs::Image>(keyframe_image_frcnn,1);
+
+    debug_channel = nh_.resolveName("lsd_slam/debug_channel");
+	debug_channel_publisher = nh_.advertise<std_msgs::String>(debug_channel,1000);
+
 	///
 
-
+	//flag = 10;
 	publishLvl=0;
 }
+
 
 ROSOutput3DWrapper::~ROSOutput3DWrapper()
 {
 }
 
 
-void ROSOutput3DWrapper::publishKeyframe(Frame* f, int n = 0)
+void ROSOutput3DWrapper::publishKeyframe(Frame* f)//, int n = 0)
 {
 	lsd_slam_viewer::keyframeMsg fMsg;
 
@@ -111,13 +127,36 @@ void ROSOutput3DWrapper::publishKeyframe(Frame* f, int n = 0)
 		pc[idx].color[1] = color[idx];
 		pc[idx].color[2] = color[idx];
 		pc[idx].color[3] = color[idx];
+		
 	}
 
 	keyframe_publisher.publish(fMsg);
-	if (n ==1) {keyframe_publisher_frame_rcnn.publish(fMsg);}
+	//this function is not generating even the fMsg data on the topic
+/*
+		std_msgs::String msg;
+        std::stringstream ss;
+        ss << "hello world ";
+        msg.data = ss.str();
+		debug_channel_publisher.publish(msg);
+
+
+	//
+	//if (n ==1) {
+
+		//keyframe_publisher_frame_rcnn.publish(fMsg);
+		cv_bridge::CvImage img;
+		img.encoding = "mono16";
+		//uchar data[4] = {0,0,0,0};
+		cv::Mat src = cv::Mat(h,w,CV_16UC1,f->image(publishLvl));
+		img.image = src;//cv::Mat(f->image(publishLvl));
+		keyframe_image_frcnn_publisher.publish(img.toImageMsg());
+
+	//}
+	//*/
+
 }
 
-void ROSOutput3DWrapper::publishTrackedFrame(Frame* kf)
+void ROSOutput3DWrapper::publishTrackedFrame(Frame* kf)//, int nn = 10)
 {
 	lsd_slam_viewer::keyframeMsg fMsg;
 
@@ -136,7 +175,35 @@ void ROSOutput3DWrapper::publishTrackedFrame(Frame* kf)
 	fMsg.height = kf->height(publishLvl);
 
 	fMsg.pointcloud.clear();
+	//
+	publishFrameAsImage(kf);
+    //
+////
+/*
 
+	
+	if (n == 1){
+	std_msgs::String msg1;
+    std::stringstream ss;
+    ss << "hello world ";
+    msg1.data = ss.str();
+	debug_channel_publisher.publish(msg1);
+	
+	int h = kf -> height(publishLvl);
+	int w = kf -> width(publishLvl);
+
+
+	cv_bridge::CvImage img;
+	img.encoding = "rgba8";
+	//uchar data[4] = {0,0,0,0};
+	cv::Mat src = cv::Mat(h,w,CV_8UC4,kf->image(publishLvl));
+	img.image = src;//cv::Mat(f->image(publishLvl));
+
+	keyframe_image_frcnn_publisher.publish(img.toImageMsg());
+}
+*/////
+
+		
 	liveframe_publisher.publish(fMsg);
 
 
@@ -165,7 +232,32 @@ void ROSOutput3DWrapper::publishTrackedFrame(Frame* kf)
 	pose_publisher.publish(pMsg);
 }
 
+///
+//writing a function for publishing the frame
+void ROSOutput3DWrapper::publishFrameAsImage(Frame* f)
+{
+	
+	std_msgs::String msg1;
+    std::stringstream ss;
+    ss << "publishing frame as a ros image ";
+    msg1.data = ss.str();
+	debug_channel_publisher.publish(msg1);
+	
+	int h = f -> height(publishLvl);
+	int w = f -> width(publishLvl);
 
+
+	cv_bridge::CvImage img;
+	img.encoding = "rgba8";
+	//uchar data[4] = {0,0,0,0};
+	cv::Mat src = cv::Mat(h,w,CV_8UC4,f->image(publishLvl));
+	img.image = src;//cv::Mat(f->image(publishLvl));
+
+	keyframe_image_frcnn_publisher.publish(img.toImageMsg());
+
+
+}
+///
 
 void ROSOutput3DWrapper::publishKeyframeGraph(KeyFrameGraph* graph)
 {
